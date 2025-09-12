@@ -7,7 +7,7 @@ package main
 import (
 	"log"
 
-	"gitlab.cs.ui.ac.id/fogverse/app/handlers" // Import our handlers package
+	"gitlab.cs.ui.ac.id/fogverse/app/internal/backend/handlers"
 
 	"github.com/gin-gonic/gin" // Import the Gin framework
 )
