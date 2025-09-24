@@ -4,6 +4,8 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import NextLink from 'next/link';
+import { TextField } from '@mui/material';
+import DeployForm from './DeployForm';
 
 export default function Deploy() {
   return (
@@ -13,14 +15,15 @@ export default function Deploy() {
           my: 4,
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
+          gap: '1em',
         }}
       >
         <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
-        Deploy
+        Run Container
         </Typography>
-        <Box sx={{ maxWidth: 'sm' }}>
+        <DeployForm />
+        <Box>
+            
           <Button variant="contained" component={NextLink} href="/">
             Go to the home page
           </Button>
