@@ -2,14 +2,18 @@
 
 import React from 'react';
 import { TextField, Button, Box, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
-import { SubmitHandler, useForm } from 'react-hook-form'
+import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import IDeployData from './types/DeployData';
 
 
 type Props = {}
 
 function DeployForm() {
-    const { register, handleSubmit} = useForm<IDeployData>()
+    const { register, handleSubmit, control} = useForm<IDeployData>({
+        defaultValues: {
+            type: "service"
+        }
+    })
     const onSubmit: SubmitHandler<IDeployData> = (data) => {
         console.log(data)
     }
@@ -30,10 +34,13 @@ function DeployForm() {
             <TextField label="Container Image URL" variant='outlined' {...register("imageURL")} />
             <FormControl>
                 <FormLabel>Type</FormLabel>
-                <RadioGroup>
-                    <FormControlLabel  value="service" control={<Radio/>} label="Service" />
-                    <FormControlLabel  value="job" control={<Radio/>} label="Job" />
-                </RadioGroup>
+                <Controller control={control} name='type' render={({field}) => (
+                    <RadioGroup {...field}>
+                        <FormControlLabel  value="service" control={<Radio/>} label="Service" />
+                        <FormControlLabel  value="job" control={<Radio/>} label="Job" />
+                    </RadioGroup>
+                )} />
+                
             </FormControl>
             <TextField label="Input Topic" {...register("inputTopic")} />
             <TextField label="Output Topic" {...register("outputTopic")} />
