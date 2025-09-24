@@ -42,13 +42,10 @@ func (d *Deployer) Deploy() error {
 }
 
 func (d *Deployer) createDeployment() error {
-	// Get the deployments client for the 'default' namespace.
-	deploymentsClient := d.KubeInterface.AppsV1().Deployments(apiv1.NamespaceDefault)
+	namespace := "kafka"
+	deploymentsClient := d.KubeInterface.AppsV1().Deployments(namespace)
 
-	bootstrapServers, err := kafkautils.GetBootstrapServers(d.KubeInterface)
-	if err != nil {
-		return err
-	}
+	bootstrapServers := kafkautils.GetBootstrapServersInternal()
 	// Define the Deployment object.
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

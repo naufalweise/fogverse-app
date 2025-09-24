@@ -1,14 +1,9 @@
 # syntax=docker/dockerfile:1
 
-FROM golang:1.25.0 AS builder
-WORKDIR /app
+FROM golang:1.25.0 AS build
+WORKDIR /src
 COPY . .
 RUN go mod download
-# Build
-RUN CGO_ENABLED=1 GOOS=linux go build -o main .
+RUN go build -v -o /bin/main
 
-
-FROM scratch
-COPY --from=builder /app/main /main
-# Run
-CMD ["/main"]
+CMD ["/bin/main"]
