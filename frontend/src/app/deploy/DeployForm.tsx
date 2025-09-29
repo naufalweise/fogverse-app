@@ -1,21 +1,26 @@
 "use client";
 
-import React from 'react';
-import { TextField, Button, Box, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import React, { useActionState, useState } from 'react';
+import { TextField, Button, Box, Typography, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio, Alert, AlertTitle } from '@mui/material';
 import { Controller, SubmitHandler, useForm } from 'react-hook-form'
 import IDeployData from './types/DeployData';
+import deployContainer from './actions/deployContainer';
+import { IGenericResponse } from '@/types/response';
 
 
 type Props = {}
 
 function DeployForm() {
-    const { register, handleSubmit, control} = useForm<IDeployData>({
+    const { register, handleSubmit, control, setError,formState: {isLoading, errors}} = useForm<IDeployData>({
         defaultValues: {
             type: "service"
         }
-    })
-    const onSubmit: SubmitHandler<IDeployData> = (data) => {
-        console.log(data)
+    });
+    const onSubmit: SubmitHandler<IDeployData> = async(data) => {
+        const result = await deployContainer(data);
+        if (result.status == "error") {
+            setError("root", {"message": result.message})
+        }
     }
  
     return (
@@ -44,9 +49,15 @@ function DeployForm() {
             </FormControl>
             <TextField label="Input Topic" {...register("inputTopic")} />
             <TextField label="Output Topic" {...register("outputTopic")} />
-            <Button variant="contained" type="submit" sx={{ mt: 2 }}>
+            <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={isLoading}>
                 Submit
             </Button>
+            {errors.root && (
+                <Alert severity="error">
+                    <AlertTitle>Error</AlertTitle>
+                    {errors.root.message}
+                </Alert>
+            )}
         </Box>
   );
 }

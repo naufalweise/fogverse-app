@@ -18,7 +18,7 @@ func DeployHandler(c *gin.Context) {
 	// Bind the incoming JSON payload to the DeployRequest struct.
 	// If there's an error (e.g., missing fields), return a 400 Bad Request.
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "status": "error"})
 		return
 	}
 
@@ -26,7 +26,7 @@ func DeployHandler(c *gin.Context) {
 	// whether the app is running inside the cluster or locally.
 	clientset, err := kubeutils.GetKubeClient()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to connect to Kubernetes cluster: " + err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to connect to Kubernetes cluster: " + err.Error(), "status": "error"})
 		return
 	}
 
@@ -35,10 +35,10 @@ func DeployHandler(c *gin.Context) {
 
 	if creationErr != nil {
 		// If the resource already exists or another error occurs, return an error message.
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create resource: " + creationErr.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create resource: " + creationErr.Error(), "status": "error"})
 		return
 	}
 
 	// If everything is successful, return a 201 Created status and a success message.
-	c.JSON(http.StatusCreated, gin.H{"message": "Resource '" + request.Name + "' of type '" + request.Type + "' created successfully!"})
+	c.JSON(http.StatusCreated, gin.H{"message": "Resource '" + request.Name + "' of type '" + request.Type + "' created successfully!", "status": "success"})
 }
