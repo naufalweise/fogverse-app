@@ -46,6 +46,11 @@ func (d *Deployer) createDeployment() error {
 	deploymentsClient := d.KubeInterface.AppsV1().Deployments(namespace)
 
 	bootstrapServers := kafkautils.GetBootstrapServersInternal()
+
+	var replicas int32 = 1
+	if d.DeployRequest.Replicas != nil {
+		replicas = *d.DeployRequest.Replicas
+	}
 	// Define the Deployment object.
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -79,7 +84,7 @@ func (d *Deployer) createDeployment() error {
 							Env: []apiv1.EnvVar{
 								{Name: "INPUT_TOPIC", Value: d.DeployRequest.InputTopic},
 								{Name: "OUTPUT_TOPIC", Value: d.DeployRequest.OutputTopic},
-								{Name: "REPLICAS", Value: fmt.Sprint(*d.DeployRequest.Replicas)},
+								{Name: "REPLICAS", Value: fmt.Sprint(replicas)},
 								{Name: "BOOTSTRAP_SERVERS", Value: bootstrapServers},
 							},
 						},
