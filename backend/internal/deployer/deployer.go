@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"gitlab.cs.ui.ac.id/fogverse/app/internal/deployer/constant"
 	"gitlab.cs.ui.ac.id/fogverse/app/pkg/kafkautils"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
@@ -42,8 +43,7 @@ func (d *Deployer) Deploy() error {
 }
 
 func (d *Deployer) createDeployment() error {
-	namespace := "kafka"
-	deploymentsClient := d.KubeInterface.AppsV1().Deployments(namespace)
+	deploymentsClient := d.KubeInterface.AppsV1().Deployments(constant.Namespace)
 
 	bootstrapServers := kafkautils.GetBootstrapServersInternal()
 
@@ -55,6 +55,9 @@ func (d *Deployer) createDeployment() error {
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: d.DeployRequest.Name,
+			Labels: map[string]string{
+				"app.kubernetes.io/managed-by": constant.KubeLabel,
+			},
 		},
 		Spec: appsv1.DeploymentSpec{
 			Replicas: d.DeployRequest.Replicas,
