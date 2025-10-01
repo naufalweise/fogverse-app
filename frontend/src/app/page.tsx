@@ -22,7 +22,7 @@ export default function Home() {
         Fogverse App
         </Typography>
         <Box sx={{ maxWidth: 'sm' }}>
-          <Button variant="contained" component={NextLink} href="/deploy">
+          <Button variant="contained" component={NextLink} href="/run/services">
             Run Container
           </Button>
         </Box>
