@@ -33,5 +33,5 @@ export default async function deployContainer(data: IDeployData): Promise<IGener
 
     // If we reach this point, the request was successful.
     // Now, we can safely redirect.
-    redirect("/");
+    redirect("/run/services");
 }
