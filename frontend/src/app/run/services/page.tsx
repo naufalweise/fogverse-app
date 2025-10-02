@@ -1,19 +1,19 @@
-import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button } from "@mui/material";
+import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button, Alert } from "@mui/material";
 import getServices from "./actions";
 import Link from "next/link";
 
 
 
 export default async function Page() {
-    const services = await getServices();
+    const response = await getServices();
     return <Container>
         <Typography variant="h4" component="h1" mb="1rem">Services</Typography>
         <Link href="/deploy">
             <Button sx={{mb: "1rem"}}>Create Services</Button>
         </Link>
         
+        {response.status == "error" && <Alert severity="error">{response.message}</Alert>}
         <TableContainer component={Paper}>
-
         <Table>
             <TableHead>
                 <TableRow>
@@ -26,7 +26,7 @@ export default async function Page() {
                 </TableRow>
             </TableHead>
             <TableBody>
-                {services.data?.map(s => (
+                {response.data?.map(s => (
                     <TableRow key={s.name}>
                         <TableCell>{s.name}</TableCell>
                         <TableCell>{s.readyReplicas > 0 ? "Ready" : "Not Ready"}</TableCell>
