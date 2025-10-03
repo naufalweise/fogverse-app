@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	"gitlab.cs.ui.ac.id/fogverse/app/internal/deployer/constant"
+	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/constant"
 	v1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"

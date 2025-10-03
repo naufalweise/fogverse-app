@@ -1,11 +1,11 @@
-package deployer
+package run
 
 import (
 	"context"
 	"fmt"
 	"log"
 
-	"gitlab.cs.ui.ac.id/fogverse/app/internal/deployer/constant"
+	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/constant"
 	"gitlab.cs.ui.ac.id/fogverse/app/pkg/kafkautils"
 	appsv1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"

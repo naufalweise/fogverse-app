@@ -1,4 +1,4 @@
-package deployer
+package run
 
 // DeployRequest defines the structure of the JSON body for the /deploy endpoint.
 // It includes validation tags to ensure the fields are not empty.

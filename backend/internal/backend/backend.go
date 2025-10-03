@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.cs.ui.ac.id/fogverse/app/internal/deployer"
+	"gitlab.cs.ui.ac.id/fogverse/app/internal/run"
 )
 
 func StartServer() {
@@ -16,11 +16,11 @@ func StartServer() {
 
 	// Define our API endpoint.
 	// When a POST request is made to /deploy, it will be handled by DeployHandler.
-	router.POST("/deploy", deployer.DeployHandler)
+	router.POST("/deploy", run.DeployHandler)
 	runRoute := router.Group("/run")
 
-	runRoute.GET("/services", deployer.ListServicesHandler)
-	runRoute.POST("/services", deployer.DeployHandler)
+	runRoute.GET("/services", run.ListServicesHandler)
+	runRoute.POST("/services", run.DeployHandler)
 
 	log.Println("Starting server on port 8081...")
 	// Start the HTTP server on port 8080.

@@ -1,14 +1,14 @@
 // handlers/deploy.go
 // This package handles the business logic for run container API endpoints.
 
-package deployer
+package run
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.cs.ui.ac.id/fogverse/app/internal/deployer/service"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/kubeutils"
+	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/service"
 )
 
 // DeployHandler processes the API request to create a new deployment or job.
