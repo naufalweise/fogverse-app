@@ -22,6 +22,19 @@ type State struct {
 	ReadyReplicas int32 `json:"readyReplicas"`
 }
 
+// service layer of 'service' module
+type Svc interface {
+	List(ctx context.Context) ([]Service, error)
+}
+
+type SvcImpl struct {
+	kubeClient kubernetes.Interface
+}
+
+func NewSvc(kubeClient kubernetes.Interface) Svc {
+	return &SvcImpl{kubeClient: kubeClient}
+}
+
 func deploymentToService(deployment *v1.Deployment) Service {
 	container := deployment.Spec.Template.Spec.Containers[0]
 	inputTopic := ""
@@ -35,9 +48,9 @@ func deploymentToService(deployment *v1.Deployment) Service {
 	}
 	return Service{Name: deployment.Name, ImageURL: container.Image, Replicas: deployment.Status.Replicas, InputTopic: inputTopic, OutputTopic: outputTopic, State: State{ReadyReplicas: deployment.Status.ReadyReplicas}}
 }
-func List(k kubernetes.Interface) ([]Service, error) {
-	deploymentsClient := k.AppsV1().Deployments("kafka")
-	deploymentList, err := deploymentsClient.List(context.TODO(), metav1.ListOptions{LabelSelector: "app.kubernetes.io/managed-by=" + constant.KubeLabel})
+func (s *SvcImpl) List(ctx context.Context) ([]Service, error) {
+	deploymentsClient := s.kubeClient.AppsV1().Deployments("kafka")
+	deploymentList, err := deploymentsClient.List(ctx, metav1.ListOptions{LabelSelector: "app.kubernetes.io/managed-by=" + constant.KubeLabel})
 	if err != nil {
 		return nil, err
 	}

@@ -7,12 +7,21 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gitlab.cs.ui.ac.id/fogverse/app/internal/kubeutils"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/service"
+	"k8s.io/client-go/kubernetes"
 )
 
+type Controller struct {
+	kubeClient kubernetes.Interface
+	serviceSvc service.Svc
+}
+
+func NewController(kubeClient kubernetes.Interface) *Controller {
+	return &Controller{kubeClient: kubeClient, serviceSvc: service.NewSvc(kubeClient)}
+}
+
 // DeployHandler processes the API request to create a new deployment or job.
-func DeployHandler(c *gin.Context) {
+func (controller *Controller) DeployHandler(c *gin.Context) {
 	var request DeployRequest
 
 	// Bind the incoming JSON payload to the DeployRequest struct.
@@ -21,16 +30,7 @@ func DeployHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "status": "error"})
 		return
 	}
-
-	// Get a Kubernetes clientset. This function is smart and will work
-	// whether the app is running inside the cluster or locally.
-	clientset, err := kubeutils.GetKubeClient()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to connect to Kubernetes cluster: " + err.Error(), "status": "error"})
-		return
-	}
-
-	d := Deployer{KubeInterface: clientset, DeployRequest: request}
+	d := Deployer{KubeInterface: controller.kubeClient, DeployRequest: request}
 	creationErr := d.Deploy()
 
 	if creationErr != nil {
@@ -43,15 +43,9 @@ func DeployHandler(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"message": "Resource '" + request.Name + "' of type '" + request.Type + "' created successfully!", "status": "success"})
 }
 
-func ListServicesHandler(c *gin.Context) {
-
-	clientset, err := kubeutils.GetKubeClient()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to connect to Kubernetes cluster: " + err.Error(), "status": "error"})
-		return
-	}
-
-	services, err := service.List(clientset)
+func (controller *Controller) ListServices(c *gin.Context) {
+	ctx := c.Request.Context()
+	services, err := controller.serviceSvc.List(ctx)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Failed to get services: " + err.Error()})
 		return

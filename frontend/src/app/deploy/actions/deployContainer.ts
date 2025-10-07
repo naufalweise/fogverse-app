@@ -10,7 +10,7 @@ export default async function deployContainer(data: IDeployData): Promise<IGener
     let response: Response; // Declare response variable outside the try block
 
     try {
-        response = await fetch(`${BACKEND_URL}/deploy`, {
+        response = await fetch(`${BACKEND_URL}/run/services`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

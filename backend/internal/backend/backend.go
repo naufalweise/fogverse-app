@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.cs.ui.ac.id/fogverse/app/internal/kubeutils"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/run"
 )
 
@@ -14,16 +15,16 @@ func StartServer() {
 	// Set a lower memory limit for multipart forms (defaults to 32 MiB)
 	router.MaxMultipartMemory = 8 << 20 // 8 MiB
 
-	// Define our API endpoint.
-	// When a POST request is made to /deploy, it will be handled by DeployHandler.
-	router.POST("/deploy", run.DeployHandler)
-	runRoute := router.Group("/run")
+	kubeClient, err := kubeutils.GetKubeClient()
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	runRoute.GET("/services", run.ListServicesHandler)
-	runRoute.POST("/services", run.DeployHandler)
+	runRoute := router.Group("/run")
+	runController := run.NewController(kubeClient)
+	runController.SetupRoutes(runRoute)
 
 	log.Println("Starting server on port 8081...")
-	// Start the HTTP server on port 8080.
 	// The server will run indefinitely until the program is terminated.
 	if err := router.Run(":8081"); err != nil {
 		log.Fatalf("Failed to run server: %v", err)
