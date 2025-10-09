@@ -18,11 +18,10 @@ export default async function Page() {
             <TableHead>
                 <TableRow>
                     <TableCell>Name</TableCell>
-                    {/* <TableCell>Status</TableCell> */}
+                    <TableCell>Completions</TableCell>
                     <TableCell>Image</TableCell>
                     <TableCell>Input Topic</TableCell>
                     <TableCell>Output Topic</TableCell>
-                    <TableCell>Completions</TableCell>
                     <TableCell>Paralellism</TableCell>
                 </TableRow>
             </TableHead>
@@ -30,11 +29,10 @@ export default async function Page() {
                 {response.data?.map(s => (
                     <TableRow key={s.name}>
                         <TableCell>{s.name}</TableCell>
-                        {/* <TableCell>{s.readyReplicas > 0 ? "Ready" : "Not Ready"}</TableCell> */}
+                        <TableCell>{s.status.succeeded} / {s.completion} </TableCell>
                         <TableCell>{s.imageURL}</TableCell>
                         <TableCell>{s.inputTopic}</TableCell>
                         <TableCell>{s.outputTopic}</TableCell>
-                        <TableCell>{s.completion}</TableCell>
                         <TableCell>{s.parallelism}</TableCell>
                     </TableRow>
                     ))}

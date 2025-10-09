@@ -19,6 +19,11 @@ type Job struct {
 	OutputTopic string `json:"outputTopic" binding:"required"`
 	Completion  *int32 `json:"completion" binding:"required"`  // completion parameter in kubernetes job
 	Parallelism *int32 `json:"parallelism" binding:"required"` // parallelism parameter in kubernetes job
+	Status      Status `json:"status"`
+}
+
+type Status struct {
+	Succeeded int32 `json:"succeeded"` // num of pods with status completed
 }
 
 type Svc interface {
@@ -105,5 +110,5 @@ func NewJobFromKubeJob(kubeJob *batchv1.Job) Job {
 			outputTopic = env.Value
 		}
 	}
-	return Job{Name: kubeJob.Name, ImageURL: kubeJob.Spec.Template.Spec.Containers[0].Image, InputTopic: inputTopic, OutputTopic: outputTopic, Completion: kubeJob.Spec.Completions, Parallelism: kubeJob.Spec.Parallelism}
+	return Job{Name: kubeJob.Name, ImageURL: kubeJob.Spec.Template.Spec.Containers[0].Image, InputTopic: inputTopic, OutputTopic: outputTopic, Completion: kubeJob.Spec.Completions, Parallelism: kubeJob.Spec.Parallelism, Status: Status{Succeeded: kubeJob.Status.Succeeded}}
 }
