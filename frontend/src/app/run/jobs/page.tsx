@@ -1,4 +1,4 @@
-import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button, Alert, Tab } from "@mui/material";
+import { Container, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Button, Alert, } from "@mui/material";
 import getJobs from "./actions";
 import Link from "next/link";
 
@@ -8,7 +8,7 @@ export default async function Page() {
     const response = await getJobs();
     return <Container>
         <Typography variant="h4" component="h1" mb="1rem">Jobs</Typography>
-        <Link href="/deploy">
+        <Link href="/run/jobs/create">
             <Button sx={{mb: "1rem"}}>Create Job</Button>
         </Link>
         
@@ -34,8 +34,8 @@ export default async function Page() {
                         <TableCell>{s.imageURL}</TableCell>
                         <TableCell>{s.inputTopic}</TableCell>
                         <TableCell>{s.outputTopic}</TableCell>
-                        <TableCell>{s.completions}</TableCell>
-                        <TableCell>{s.paralellism}</TableCell>
+                        <TableCell>{s.completion}</TableCell>
+                        <TableCell>{s.parallelism}</TableCell>
                     </TableRow>
                     ))}
             </TableBody>

@@ -3,6 +3,6 @@ type Job = {
     imageURL: string;
     inputTopic: string;
     outputTopic: string;
-    completions: number;
-    paralellism: number;
+    completion: number;
+    parallelism: number;
 }

@@ -1,0 +1,56 @@
+"use client";
+
+import React from 'react';
+import { TextField, Button, Box, Alert, AlertTitle } from '@mui/material';
+import { SubmitHandler, useForm } from 'react-hook-form'
+import deployContainer from './actions';
+
+
+type Props = {}
+
+// TODO: Implement validation on server on topic must not be the same
+function DeployForm() {
+    const { register, handleSubmit, setError,formState: {isLoading, errors}} = useForm<Job>({
+        defaultValues: {
+            completion: 1,
+            parallelism: 1
+        }
+    });
+    const onSubmit: SubmitHandler<Job> = async(data) => {
+        const result = await deployContainer(data);
+        if (result.status == "error") {
+            setError("root", {"message": result.message})
+        }
+    }
+    return (
+        <Box
+            component="form"
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: "1em",
+            }}
+            noValidate
+            autoComplete="off"
+            onSubmit={handleSubmit(onSubmit)}
+            >
+            <TextField label="Name" variant='outlined' {...register("name")} />
+            <TextField label="Container Image URL" variant='outlined' {...register("imageURL")} />
+            <TextField label="Input Topic" {...register("inputTopic")} />
+            <TextField label="Output Topic" {...register("outputTopic")} />
+            <TextField label="Completions" {...register("completion")} />
+            <TextField label="Paralellism" {...register("parallelism")} />
+            <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={isLoading}>
+                Submit
+            </Button>
+            {errors.root && (
+                <Alert severity="error">
+                    <AlertTitle>Error</AlertTitle>
+                    {errors.root.message}
+                </Alert>
+            )}
+        </Box>
+  );
+}
+
+export default DeployForm;
