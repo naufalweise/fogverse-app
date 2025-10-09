@@ -38,8 +38,8 @@ function DeployForm() {
             <TextField label="Container Image URL" variant='outlined' {...register("imageURL")} />
             <TextField label="Input Topic" {...register("inputTopic")} />
             <TextField label="Output Topic" {...register("outputTopic")} />
-            <TextField label="Completions" {...register("completion")} />
-            <TextField label="Paralellism" {...register("parallelism")} />
+            <TextField type='number' label="Completions" variant='outlined' {...register("completion")} />
+            <TextField type='number' label="Paralellism" {...register("parallelism")} />
             <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={isLoading}>
                 Submit
             </Button>
