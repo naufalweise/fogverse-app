@@ -64,6 +64,7 @@ func (s *SvcImpl) Create(ctx context.Context, job Job) error {
 								{Name: "INPUT_TOPIC", Value: job.InputTopic},
 								{Name: "OUTPUT_TOPIC", Value: job.OutputTopic},
 								{Name: "BOOTSTRAP_SERVERS", Value: bootstrapServers},
+								{Name: "GROUP", Value: "job-" + job.Name},
 							},
 						},
 					},
