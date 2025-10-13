@@ -8,6 +8,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import { createContext, useContext, useState } from 'react';
+import NextLink from 'next/link';
 
 type SidebarContextValue = {
   isOpen: boolean
@@ -39,22 +40,28 @@ export function SidebarProvider({children} : Readonly<{children: React.ReactNode
   return <SidebarContext.Provider value={{isOpen, open, close, toggle }}>{children}</SidebarContext.Provider>
 }
 
+type SidebarLinkProps = {
+  href: string
+  label: string
+}
+function SidebarLink({href, label} : Readonly<SidebarLinkProps>) {
+  return (
+    <ListItem disablePadding>
+      <ListItemButton LinkComponent={NextLink} href={href}>
+        <ListItemText>{label}</ListItemText>
+      </ListItemButton>
+    </ListItem>
+  )
+}
+
 export default function Sidebar() {
   const sidebar = useContext(SidebarContext);
   return (
       <Drawer open={sidebar.isOpen} onClose={sidebar.close}>
         <Box sx={{ width: 200}}>
           <List>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemText>Services</ListItemText>
-              </ListItemButton>
-            </ListItem>
-            <ListItem disablePadding>
-              <ListItemButton>
-                <ListItemText>Jobs</ListItemText>
-              </ListItemButton>
-            </ListItem>
+            <SidebarLink href='/run/services' label='Services'/>
+            <SidebarLink href='/run/jobs' label='Jobs'/>
           </List>
         </Box>
        
