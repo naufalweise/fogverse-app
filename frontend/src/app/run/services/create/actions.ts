@@ -1,12 +1,11 @@
 "use server";
 
 import { BACKEND_URL } from "@/settings";
-import IDeployData from "../types/DeployData";
 import { redirect } from 'next/navigation'
 import { IGenericResponse } from "@/types/response";
 
 
-export default async function deployContainer(data: IDeployData): Promise<IGenericResponse> {
+export default async function deployContainer(data: Service): Promise<IGenericResponse> {
     let response: Response; // Declare response variable outside the try block
 
     try {

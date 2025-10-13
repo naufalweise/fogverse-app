@@ -8,7 +8,7 @@ export default async function Page() {
     const response = await getServices();
     return <Container>
         <Typography variant="h4" component="h1" mb="1rem">Services</Typography>
-        <Link href="/deploy">
+        <Link href="/run/services/create">
             <Button sx={{mb: "1rem"}}>Create Services</Button>
         </Link>
         
