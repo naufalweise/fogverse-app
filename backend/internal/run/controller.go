@@ -22,27 +22,20 @@ func NewController(kubeClient kubernetes.Interface) *Controller {
 	return &Controller{kubeClient: kubeClient, serviceSvc: service.NewSvc(kubeClient), jobSvc: job.NewSvc(kubeClient)}
 }
 
-// DeployHandler processes the API request to create a new deployment or job.
-func (controller *Controller) DeployHandler(c *gin.Context) {
-	var request DeployRequest
+func (controller *Controller) CreateService(c *gin.Context) {
+	var request service.Service
 
-	// Bind the incoming JSON payload to the DeployRequest struct.
-	// If there's an error (e.g., missing fields), return a 400 Bad Request.
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error(), "status": "error"})
 		return
 	}
-	d := Deployer{KubeInterface: controller.kubeClient, DeployRequest: request}
-	creationErr := d.Deploy()
-
-	if creationErr != nil {
-		// If the resource already exists or another error occurs, return an error message.
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create resource: " + creationErr.Error(), "status": "error"})
+	err := controller.serviceSvc.Create(c.Request.Context(), request)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Failed to create resource: " + err.Error(), "status": "error"})
 		return
 	}
 
-	// If everything is successful, return a 201 Created status and a success message.
-	c.JSON(http.StatusCreated, gin.H{"message": "Resource '" + request.Name + "' of type '" + request.Type + "' created successfully!", "status": "success"})
+	c.JSON(http.StatusCreated, gin.H{"message": "Service '" + request.Name + "' created successfully!", "status": "success"})
 }
 
 func (controller *Controller) ListServices(c *gin.Context) {
