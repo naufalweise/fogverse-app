@@ -8,18 +8,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/job"
+	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/keda"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/service"
-	"k8s.io/client-go/kubernetes"
 )
 
 type Controller struct {
-	kubeClient kubernetes.Interface
 	serviceSvc service.Svc
 	jobSvc     job.Svc
+	kedaSvc    keda.Svc
 }
 
-func NewController(kubeClient kubernetes.Interface) *Controller {
-	return &Controller{kubeClient: kubeClient, serviceSvc: service.NewSvc(kubeClient), jobSvc: job.NewSvc(kubeClient)}
+func NewController(serviceSvc service.Svc, jobSvc job.Svc, kedaSvc keda.Svc) *Controller {
+	return &Controller{serviceSvc: serviceSvc, jobSvc: jobSvc, kedaSvc: kedaSvc}
 }
 
 func (controller *Controller) CreateService(c *gin.Context) {

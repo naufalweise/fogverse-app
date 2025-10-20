@@ -19,8 +19,16 @@ import (
 // application is running inside a pod in the Kubernetes cluster.
 // If that fails, it falls back to using the local kubeconfig file, which is
 // useful for local development and testing.
-func GetKubeClient() (*kubernetes.Clientset, error) {
-	// Try to create an in-cluster config.
+func GetKubeClient(config *rest.Config) (*kubernetes.Clientset, error) {
+	// Create the clientset from the config.
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	return clientset, nil
+}
+
+func GetKubeConfig() (*rest.Config, error) {
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Printf("Could not create in-cluster config: %v. Falling back to kubeconfig.", err)
@@ -32,18 +40,11 @@ func GetKubeClient() (*kubernetes.Clientset, error) {
 			// Handle cases where home directory is not available.
 			kubeconfig = os.Getenv("KUBECONFIG")
 		}
-
-		// Use the current context in kubeconfig.
 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfig)
 		if err != nil {
 			return nil, err
 		}
+		return config, nil
 	}
-
-	// Create the clientset from the config.
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return nil, err
-	}
-	return clientset, nil
+	return config, nil
 }

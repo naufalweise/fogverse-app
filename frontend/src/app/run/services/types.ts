@@ -5,4 +5,9 @@ type Service = {
     outputTopic: string;
     replicas: number;
     readyReplicas: number;
+    useKeda: boolean;
+}
+
+type KedaConfig = {
+
 }

@@ -1,10 +1,9 @@
 "use client";
 
-import React from 'react';
-import { TextField, Button, Box, Alert, AlertTitle } from '@mui/material';
+import { TextField, Button, Box, Alert, AlertTitle, FormControlLabel } from '@mui/material';
 import { SubmitHandler, useForm } from 'react-hook-form'
 import deployContainer from './actions';
-
+import Checkbox from '@mui/material/Checkbox';
 
 type Props = {}
 
@@ -16,6 +15,7 @@ function DeployForm() {
         }
     });
     const onSubmit: SubmitHandler<Service> = async(data) => {
+        // console.log(data)
         const result = await deployContainer(data);
         if (result.status == "error") {
             setError("root", {"message": result.message})
@@ -38,6 +38,9 @@ function DeployForm() {
             <TextField label="Input Topic" {...register("inputTopic")} />
             <TextField label="Output Topic" {...register("outputTopic")} />
             <TextField type='number' label="Replicas" {...register("replicas")} />
+            <FormControlLabel control={<Checkbox slotProps={{input: {
+                ...register("useKeda")
+            }}} />} label="Use Keda" />
             <Button variant="contained" type="submit" sx={{ mt: 2 }} disabled={isLoading}>
                 Submit
             </Button>

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	kedav2 "github.com/kedacore/keda/v2/apis/keda/v1alpha1"
+	kedaclientset "github.com/kedacore/keda/v2/pkg/generated/clientset/versioned"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/constant"
 	"gitlab.cs.ui.ac.id/fogverse/app/pkg/kafkautils"
 	appsv1 "k8s.io/api/apps/v1"
@@ -14,31 +16,20 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type Service struct {
-	Name        string `json:"name" binding:"required"`
-	ImageURL    string `json:"imageURL" binding:"required"`
-	Replicas    *int32 `json:"replicas"`
-	InputTopic  string `json:"inputTopic" binding:"required"`
-	OutputTopic string `json:"outputTopic" binding:"required"`
-	State
-}
-
-type State struct {
-	ReadyReplicas int32 `json:"readyReplicas"`
-}
-
 // Svc is a service layer of 'service' module
 type Svc interface {
 	Create(ctx context.Context, service Service) error
 	List(ctx context.Context) ([]Service, error)
+	CreateAutoscale(ctx context.Context, service Service) error
 }
 
 type SvcImpl struct {
 	kubeClient kubernetes.Interface
+	kedaClient kedaclientset.Interface
 }
 
-func NewSvc(kubeClient kubernetes.Interface) Svc {
-	return &SvcImpl{kubeClient: kubeClient}
+func NewSvc(kubeClient kubernetes.Interface, kedaClient kedaclientset.Interface) Svc {
+	return &SvcImpl{kubeClient: kubeClient, kedaClient: kedaClient}
 }
 
 func deploymentToService(deployment *v1.Deployment) Service {
@@ -114,6 +105,15 @@ func (s *SvcImpl) Create(ctx context.Context, service Service) error {
 	}
 
 	log.Printf("Created deployment %q.\n", result.GetObjectMeta().GetName())
+
+	if service.UseKeda {
+		log.Println("Creating Keda service...")
+		err := s.CreateAutoscale(ctx, service)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -128,4 +128,44 @@ func (s *SvcImpl) List(ctx context.Context) ([]Service, error) {
 		services = append(services, deploymentToService(&deployment))
 	}
 	return services, nil
+}
+
+// CreateAutoscale create KEDA scaled object to autoscale service
+func (s *SvcImpl) CreateAutoscale(ctx context.Context, service Service) error {
+	scaledObject := &kedav2.ScaledObject{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      fmt.Sprintf("%s-scaledobject", service.Name),
+			Namespace: constant.Namespace,
+			Labels: map[string]string{
+				"app.kubernetes.io/managed-by": constant.KubeLabel,
+			},
+		},
+		Spec: kedav2.ScaledObjectSpec{
+			ScaleTargetRef: &kedav2.ScaleTarget{
+				Name: service.Name,
+			},
+			MinReplicaCount: service.KedaConfig.MinReplicaCount,
+			MaxReplicaCount: service.KedaConfig.MaxReplicaCount,
+			CooldownPeriod:  service.KedaConfig.CooldownPeriod,
+			PollingInterval: service.KedaConfig.PollingInterval,
+			Triggers: []kedav2.ScaleTriggers{
+				{
+					Type: "apache-kafka",
+					Metadata: map[string]string{
+						"bootstrapServers": kafkautils.GetBootstrapServersInternal(),
+						"consumerGroup":    service.Name,
+						"topic":            service.InputTopic,
+						"lagThreshold":     fmt.Sprint(service.KedaConfig.LagThreshold),
+					},
+				},
+			},
+		},
+	}
+	result, err := s.kedaClient.KedaV1alpha1().ScaledObjects(constant.Namespace).Create(ctx, scaledObject, metav1.CreateOptions{})
+	if err != nil {
+		log.Fatalf("Error creating ScaledObject: %v", err)
+		return err
+	}
+	log.Printf("Successfully created ScaledObject: %s\n", result.GetName())
+	return nil
 }
