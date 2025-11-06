@@ -12,6 +12,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
+// Job is a type of fogverse run containers workload
+// that stops once the program is finished
 type Job struct {
 	Name        string `json:"name" binding:"required"`
 	ImageURL    string `json:"imageURL" binding:"required"`
