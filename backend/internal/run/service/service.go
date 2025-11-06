@@ -132,9 +132,21 @@ func (s *SvcImpl) List(ctx context.Context) ([]Service, error) {
 
 // CreateAutoscale create KEDA scaled object to autoscale service
 func (s *SvcImpl) CreateAutoscale(ctx context.Context, service Service) error {
+
+	// init default keda config
+	config := KedaConfig{}
+	if service.KedaConfig != nil {
+		config = *service.KedaConfig
+	}
+	if config.LagThreshold == nil {
+		defaultLagThreshold := int32(10)
+		config.LagThreshold = &defaultLagThreshold
+	}
+
+	// create scaled object
 	scaledObject := &kedav2.ScaledObject{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-scaledobject", service.Name),
+			Name:      fmt.Sprintf("fogverse-run-%s", service.Name),
 			Namespace: constant.Namespace,
 			Labels: map[string]string{
 				"app.kubernetes.io/managed-by": constant.KubeLabel,
@@ -144,10 +156,10 @@ func (s *SvcImpl) CreateAutoscale(ctx context.Context, service Service) error {
 			ScaleTargetRef: &kedav2.ScaleTarget{
 				Name: service.Name,
 			},
-			MinReplicaCount: service.KedaConfig.MinReplicaCount,
-			MaxReplicaCount: service.KedaConfig.MaxReplicaCount,
-			CooldownPeriod:  service.KedaConfig.CooldownPeriod,
-			PollingInterval: service.KedaConfig.PollingInterval,
+			MinReplicaCount: config.MinReplicaCount,
+			MaxReplicaCount: config.MaxReplicaCount,
+			CooldownPeriod:  config.CooldownPeriod,
+			PollingInterval: config.PollingInterval,
 			Triggers: []kedav2.ScaleTriggers{
 				{
 					Type: "apache-kafka",
@@ -155,7 +167,7 @@ func (s *SvcImpl) CreateAutoscale(ctx context.Context, service Service) error {
 						"bootstrapServers": kafkautils.GetBootstrapServersInternal(),
 						"consumerGroup":    service.Name,
 						"topic":            service.InputTopic,
-						"lagThreshold":     fmt.Sprint(service.KedaConfig.LagThreshold),
+						"lagThreshold":     fmt.Sprint(*config.LagThreshold),
 					},
 				},
 			},
