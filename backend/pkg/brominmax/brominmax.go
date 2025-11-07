@@ -11,17 +11,17 @@ const (
 
 type Config struct {
 	AlgoType
-	TargetThroughput            int
-	ProductionThroughput        int
-	ConsumerThroughput          int
-	Consumers                   int
-	Replicas                    int
-	MaxBrokers                  int // B
-	UnavailabilityTime          int // u
-	MaxOpenFiles                int // Hmax, maximum open files handles
-	ReplicationLatency          int
-	ReplicationLatencyThreshold int // L
-	UnavailabilityThreshold     int // U
+	T    int
+	Tp   int
+	Tc   int
+	C    int
+	R    int
+	B    int // B
+	Uu   int // u
+	U    int // U
+	Hmax int // Hmax, maximum open files handles
+	Lr   int
+	L    int // L
 }
 
 // GetPartitions returns partition, replica, and error
@@ -36,14 +36,14 @@ func GetPartitions(config Config) (int, int, error) {
 
 func Bromin(config Config) (int, int, error) {
 	pMin := max(
-		config.TargetThroughput/config.ProductionThroughput,
-		config.TargetThroughput/config.ConsumerThroughput,
-		config.Consumers)
+		config.T/config.Tp,
+		config.T/config.Tc,
+		config.C)
 
-	for b := 0; b < config.MaxBrokers; b++ {
-		for p := b * config.MaxOpenFiles / config.Replicas; p >= pMin; p-- {
-			if p*config.Replicas*config.ReplicationLatency <= b*config.ReplicationLatencyThreshold &&
-				p*config.UnavailabilityTime <= b*config.UnavailabilityThreshold {
+	for b := config.R; b <= config.B; b++ {
+		for p := b * config.Hmax / config.R; p >= pMin; p-- {
+			if p*config.R*config.Lr <= b*config.L &&
+				p*config.Uu <= b*config.U {
 				return p, b, nil
 			}
 		}
@@ -52,14 +52,14 @@ func Bromin(config Config) (int, int, error) {
 }
 func Bromax(config Config) (int, int, error) {
 	pMin := max(
-		config.TargetThroughput/config.ProductionThroughput,
-		config.TargetThroughput/config.ConsumerThroughput,
-		config.Consumers)
+		config.T/config.Tp,
+		config.T/config.Tc,
+		config.C)
 
-	for b := config.MaxBrokers; b >= config.Replicas; b-- {
-		for p := b * config.MaxOpenFiles / config.Replicas; p >= pMin; p-- {
-			if p*config.Replicas*config.ReplicationLatency <= b*config.ReplicationLatencyThreshold &&
-				p*config.UnavailabilityTime <= b*config.UnavailabilityThreshold {
+	for b := config.B; b >= config.R; b-- {
+		for p := b * config.Hmax / config.R; p >= pMin; p-- {
+			if p*config.R*config.Lr <= b*config.L &&
+				p*config.Uu <= b*config.U {
 				return p, b, nil
 			}
 		}
