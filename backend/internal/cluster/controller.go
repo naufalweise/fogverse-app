@@ -19,7 +19,7 @@ func (controller *Controller) CreateTopic(c *gin.Context) {
 	if err := c.ShouldBindJSON(&topic); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	}
-	err := controller.svc.CreateTopic(c, topic)
+	err := controller.svc.CreateTopic(c.Request.Context(), topic)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return
@@ -34,7 +34,7 @@ func (controller *Controller) DeleteTopic(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "topic name is required"})
 		return
 	}
-	err := controller.svc.DeleteTopic(c, topicName)
+	err := controller.svc.DeleteTopic(c.Request.Context(), topicName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return
@@ -47,7 +47,7 @@ func (controller *Controller) UpdateTopic(c *gin.Context) {
 	if err := c.ShouldBindJSON(&topic); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
 	}
-	err := controller.svc.UpdateTopic(c, topic)
+	err := controller.svc.UpdateTopic(c.Request.Context(), topic)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return
@@ -61,7 +61,7 @@ func (controller *Controller) GetTopic(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "topic name is required"})
 		return
 	}
-	topic, err := controller.svc.GetTopic(c, topicName)
+	topic, err := controller.svc.GetTopic(c.Request.Context(), topicName)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return
@@ -70,7 +70,7 @@ func (controller *Controller) GetTopic(c *gin.Context) {
 }
 
 func (controller *Controller) ListTopics(c *gin.Context) {
-	topics, err := controller.svc.ListTopics(c)
+	topics, err := controller.svc.ListTopics(c.Request.Context())
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return
