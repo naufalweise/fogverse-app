@@ -9,8 +9,8 @@ type Service struct {
 	InputTopic  string `json:"inputTopic" binding:"required"`
 	OutputTopic string `json:"outputTopic" binding:"required"`
 	State
-	KedaConfig KedaConfig `json:"kedaConfig"`
-	UseKeda    bool       `json:"useKeda" default:"false"`
+	KedaConfig *KedaConfig `json:"kedaConfig"`
+	UseKeda    bool        `json:"useKeda" default:"false"`
 }
 
 type State struct {
