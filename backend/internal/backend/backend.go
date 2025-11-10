@@ -4,11 +4,13 @@ import (
 	"log"
 
 	"github.com/gin-gonic/gin"
+	"gitlab.cs.ui.ac.id/fogverse/app/internal/cluster"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/kubeutils"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/run"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/job"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/keda"
 	"gitlab.cs.ui.ac.id/fogverse/app/internal/run/service"
+	"k8s.io/client-go/dynamic"
 )
 
 func StartServer() {
@@ -21,6 +23,11 @@ func StartServer() {
 	kubeConfig, err := kubeutils.GetKubeConfig()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	dynamicClient, err := dynamic.NewForConfig(kubeConfig)
+	if err != nil {
+		log.Fatalf("Error creating dynamic client: %v", err)
 	}
 
 	kubeClient, err := kubeutils.GetKubeClient(kubeConfig)
@@ -36,10 +43,15 @@ func StartServer() {
 	kedaSvc := keda.NewSvc(kubeClient, kedaClient)
 	serviceSvc := service.NewSvc(kubeClient, kedaClient)
 	jobSvc := job.NewSvc(kubeClient)
+	clusterSvc := cluster.NewSvcImpl(dynamicClient)
 
 	runRoute := router.Group("/run")
 	runController := run.NewController(serviceSvc, jobSvc, kedaSvc)
 	runController.SetupRoutes(runRoute)
+
+	clusterRoute := router.Group("/cluster")
+	clusterController := cluster.NewController(clusterSvc)
+	clusterController.SetupRoutes(clusterRoute)
 
 	log.Println("Starting server on port 8081...")
 	// The server will run indefinitely until the program is terminated.
