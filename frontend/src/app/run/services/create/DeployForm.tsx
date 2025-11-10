@@ -6,7 +6,6 @@ import deployContainer from './actions';
 import Checkbox from '@mui/material/Checkbox';
 import InputAdornment from '@mui/material/InputAdornment';
 
-type Props = {}
 
 // TODO: Implement validation on server on topic must not be the same
 function DeployForm() {
